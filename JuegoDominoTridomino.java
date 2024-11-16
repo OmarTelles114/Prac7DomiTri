@@ -9,8 +9,6 @@ public class JuegoDominoTridomino {
     private List<Ficha> mesa;
     private List<Ficha> jugador1;
     private List<Ficha> jugador2;
-    private int puntuacion1;
-    private int puntuacion2;
     private String nombreJugador1;
     private String nombreJugador2;
 
@@ -19,8 +17,6 @@ public class JuegoDominoTridomino {
         mesa = new ArrayList<>();
         jugador1 = new ArrayList<>();
         jugador2 = new ArrayList<>();
-        puntuacion1 = 0;
-        puntuacion2 = 0;
         inicializarPozo();
         repartirFichas();
     }
@@ -32,7 +28,7 @@ public class JuegoDominoTridomino {
             }
         }
         Random rand = new Random();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 56; i++) {
             pozo.add(new FichaTridomino(rand.nextInt(7), rand.nextInt(7), rand.nextInt(7)));
         }
         Collections.shuffle(pozo);
@@ -54,31 +50,31 @@ public class JuegoDominoTridomino {
         System.out.print("Ingrese el nombre del Jugador 2: ");
         nombreJugador2 = scanner.nextLine();
 
-        System.out.println("Inicia el juego de Dominó y Tridominó!");
+        System.out.println("¡Inicia el juego de Dominó y Tridominó!");
         boolean turnoJugador1 = true;
 
         while (!jugador1.isEmpty() && !jugador2.isEmpty()) {
             List<Ficha> jugadorActual = turnoJugador1 ? jugador1 : jugador2;
             String nombreActual = turnoJugador1 ? nombreJugador1 : nombreJugador2;
-            int puntosActual = turnoJugador1 ? puntuacion1 : puntuacion2;
 
-            System.out.println("\nMesa: " + mesa);
-            System.out.println(nombreActual + ", tus fichas son: ");
+            System.out.println("\nMesa:");
+            imprimirMesa();
+            System.out.println(nombreActual + ", tus fichas son:");
             for (int i = 0; i < jugadorActual.size(); i++) {
-                System.out.println((i + 1) + ": " + jugadorActual.get(i));
+                System.out.println((i + 1) + ": " + jugadorActual.get(i).toHorizontalString());
             }
             System.out.println("0: Tomar ficha del pozo");
 
             boolean fichaColocada = false;
             while (!fichaColocada) {
-                System.out.print(nombreActual + ", elige el número de la ficha que deseas colocar (o 0 para tomar una ficha): ");
+                System.out.print(nombreActual + ", elige una ficha: ");
                 int eleccion = scanner.nextInt();
 
                 if (eleccion == 0) {
                     if (!pozo.isEmpty()) {
                         Ficha nuevaFicha = pozo.remove(0);
                         jugadorActual.add(nuevaFicha);
-                        System.out.println("Tomaste una ficha: " + nuevaFicha);
+                        System.out.println("Tomaste una ficha: " + nuevaFicha.toHorizontalString());
                     } else {
                         System.out.println("No hay más fichas en el pozo.");
                     }
@@ -86,24 +82,31 @@ public class JuegoDominoTridomino {
                 } else if (eleccion > 0 && eleccion <= jugadorActual.size()) {
                     Ficha fichaSeleccionada = jugadorActual.get(eleccion - 1);
 
-                    if (mesa.isEmpty() || fichaSeleccionada.puedeColocarse(mesa.get(mesa.size() - 1))) {
+                    if (mesa.isEmpty()) {
                         mesa.add(fichaSeleccionada);
-                        puntosActual += fichaSeleccionada.getPuntos();
                         jugadorActual.remove(fichaSeleccionada);
                         fichaColocada = true;
-                        System.out.println("Ficha colocada.");
                     } else {
-                        System.out.println("No puedes colocar esa ficha. Elige otra.");
+                        System.out.print("¿Colocar arriba (1) o abajo (2)? ");
+                        int posicion = scanner.nextInt();
+
+                        if (posicion == 1 && fichaSeleccionada.puedeConectarse(mesa.get(0))) {
+                            fichaSeleccionada.ajustarParaConexion(mesa.get(0).getLado1(), true);
+                            mesa.add(0, fichaSeleccionada);
+                            jugadorActual.remove(fichaSeleccionada);
+                            fichaColocada = true;
+                        } else if (posicion == 2 && fichaSeleccionada.puedeConectarse(mesa.get(mesa.size() - 1))) {
+                            fichaSeleccionada.ajustarParaConexion(mesa.get(mesa.size() - 1).getLado2(), true);
+                            mesa.add(fichaSeleccionada);
+                            jugadorActual.remove(fichaSeleccionada);
+                            fichaColocada = true;
+                        } else {
+                            System.out.println("No puedes colocar esa ficha. Intenta otra.");
+                        }
                     }
                 } else {
                     System.out.println("Elección inválida. Intenta de nuevo.");
                 }
-            }
-
-            if (turnoJugador1) {
-                puntuacion1 = puntosActual;
-            } else {
-                puntuacion2 = puntosActual;
             }
 
             turnoJugador1 = !turnoJugador1;
@@ -113,14 +116,23 @@ public class JuegoDominoTridomino {
         scanner.close();
     }
 
-    private void determinarGanador() {
-        System.out.println("\nJuego terminado.");
-        System.out.println("Puntuación " + nombreJugador1 + ": " + puntuacion1);
-        System.out.println("Puntuación " + nombreJugador2 + ": " + puntuacion2);
+    private void imprimirMesa() {
+        for (Ficha ficha : mesa) {
+            System.out.println(ficha);
+        }
+    }
 
-        if (puntuacion1 > puntuacion2) {
+    private void determinarGanador() {
+        int puntosJugador1 = jugador1.size();
+        int puntosJugador2 = jugador2.size();
+
+        System.out.println("\nJuego terminado.");
+        System.out.println(nombreJugador1 + ": " + puntosJugador1 + " puntos.");
+        System.out.println(nombreJugador2 + ": " + puntosJugador2 + " puntos.");
+
+        if (puntosJugador1 < puntosJugador2) {
             System.out.println("¡" + nombreJugador1 + " gana!");
-        } else if (puntuacion2 > puntuacion1) {
+        } else if (puntosJugador1 > puntosJugador2) {
             System.out.println("¡" + nombreJugador2 + " gana!");
         } else {
             System.out.println("¡Es un empate!");
