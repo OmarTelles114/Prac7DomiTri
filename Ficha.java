@@ -21,30 +21,24 @@ public class Ficha implements Movible {
         lado2 = temp;
     }
 
-    public void ajustarParaConexion(int numeroConectar, boolean esVertical) {
-        if (esVertical) {
-            if (lado2 == numeroConectar) {
-                invertir(); // Asegura que lado2 quede como lado de conexión para vertical.
-            }
-        } else {
-            if (lado1 != numeroConectar && lado2 == numeroConectar) {
-                invertir(); // Asegura que lado1 sea el lado de conexión.
-            }
+    public void ajustarParaConexion(int numeroConectar) {
+        if (lado1 != numeroConectar && lado2 == numeroConectar) {
+            invertir();
         }
     }
 
-    public boolean puedeConectarse(Ficha otra) {
-        return lado1 == otra.lado1 || lado1 == otra.lado2 || lado2 == otra.lado1 || lado2 == otra.lado2;
+    public boolean puedeConectarse(int numero) {
+        return lado1 == numero || lado2 == numero;
     }
 
     @Override
     public void rotateRight() {
-        invertir(); // Para fichas de dominó, girar equivale a invertir.
+        invertir();
     }
 
     @Override
     public void rotateLeft() {
-        rotateRight(); // La rotación izquierda es equivalente aquí.
+        invertir();
     }
 
     @Override
@@ -54,5 +48,9 @@ public class Ficha implements Movible {
 
     public String toHorizontalString() {
         return "[ " + lado1 + " | " + lado2 + " ]";
+    }
+
+    public int getPuntaje() {
+        return lado1 + lado2;
     }
 }
