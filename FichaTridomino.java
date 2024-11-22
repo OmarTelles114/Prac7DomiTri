@@ -10,21 +10,15 @@ public class FichaTridomino extends Ficha {
         return lado3;
     }
 
-    @Override
-    public void ajustarParaConexion(int numeroConectar, boolean esVertical) {
-        while (lado1 != numeroConectar && lado2 != numeroConectar && lado3 != numeroConectar) {
+    public void ajustarParaConexion(int ladoReferencia) {
+        int intentos = 0;
+        while (lado1 != ladoReferencia && lado2 != ladoReferencia && lado3 != ladoReferencia) {
             rotateRight();
+            intentos++;
+            if (intentos > 3) {
+                break; // Evitar bucles infinitos en casos atípicos
+            }
         }
-
-        if (esVertical && lado3 != numeroConectar) {
-            rotateRight(); // Asegura que lado3 sea el lado de conexión para vertical.
-        }
-    }
-
-    @Override
-    public boolean puedeConectarse(Ficha otra) {
-        return lado1 == otra.lado1 || lado1 == otra.lado2 || lado2 == otra.lado1 || lado2 == otra.lado2 ||
-                lado3 == otra.lado1 || lado3 == otra.lado2;
     }
 
     @Override
@@ -36,8 +30,16 @@ public class FichaTridomino extends Ficha {
     }
 
     @Override
-    public void rotateLeft() {
-        rotateRight(); // La rotación izquierda es equivalente aquí.
+    public boolean puedeConectarse(int numero) {
+        return lado1 == numero || lado2 == numero || lado3 == numero;
+    }
+
+    public String imprimirArriba() {
+        return "[ " + lado2 + " | " + lado3 + " ]\n[     " + lado1 + "     ]";
+    }
+
+    public String imprimirAbajo() {
+        return "[ " + lado2 + " | " + lado3 + " ]\n[     " + lado1 + "     ]";
     }
 
     @Override
@@ -46,6 +48,11 @@ public class FichaTridomino extends Ficha {
     }
 
     public String toHorizontalString() {
-        return "[ " + lado2 + " | " + lado3 + " ]\n[ " + lado1 + " ]";
+        return "[ " + lado1 + " | " + lado2 + " | " + lado3 + " ]";
+    }
+
+    @Override
+    public int getPuntaje() {
+        return lado1 + lado2 + lado3;
     }
 }
